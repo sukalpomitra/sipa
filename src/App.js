@@ -31,7 +31,6 @@ const App = () => {
 
     const handleSend = (event) => {
         event.preventDefault();
-        setHasFilled(true);
         generateRecaptcha();
         let appVerifier = window.recaptchaVerifier;
         const itemsCollection = collection(db, 'members');
@@ -45,11 +44,14 @@ const App = () => {
                             // SMS sent. Prompt user to type the code from the message, then sign the
                             // user in with confirmationResult.confirm(code).
                             window.confirmationResult = confirmationResult;
+                            setHasFilled(true);
                         })
                         .catch((error) => {
                             // Error; SMS not sent
                             console.log(error);
                         });
+                } else {
+                    alert("We could not found your membership id. PLease use this link to register yourself as a member - https://docs.google.com/forms/d/e/1FAIpQLScklFF5f0GM_ADMC-49g5vaZS2Ikz8JUfVHZGEM7RG_0j-pew/viewform.")
                 }
             })
             .catch((error) => {
@@ -84,6 +86,10 @@ const App = () => {
     if (!hasFilled) {
         return (
             <div className="app__container">
+                <header className="App-header">
+                    <h1>Hello, SIPA Member!</h1>
+                    <p>Welcome to Durga Puja 2023.</p>
+                </header>
                 <Card sx={{ width: "300px" }}>
                     <CardContent
                         sx={{

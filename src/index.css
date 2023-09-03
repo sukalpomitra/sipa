@@ -3,7 +3,9 @@
 body {
   margin: 0;
   padding: 0;
-  background-color: rgb(83, 83, 83);
+  background-image: url('images/sipa-logo.png');
+  background-size: contain; /* Adjust this as needed */
+  background-repeat: no-repeat;
   height: 100vh;
   width: 100vw;
   font-family: "Open Sans", sans-serif;

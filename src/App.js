@@ -4,6 +4,7 @@ import {
     CardContent,
     TextField,
     Typography,
+    CircularProgress,
 } from "@mui/material";
 import React, { useState } from "react";
 import { auth, db } from "./firebase";
@@ -17,6 +18,7 @@ const App = () => {
     const [memberName, setMemberName] = useState("");
     const [memberId, setMemberId] = useState("");
     const [otp, setOtp] = useState("");
+    const [loading, setLoading] = useState(false);
 
     const generateRecaptcha = () => {
         window.recaptchaVerifier = new RecaptchaVerifier(
@@ -34,6 +36,7 @@ const App = () => {
 
     const handleSend = (event) => {
         event.preventDefault();
+        setLoading(true);
         generateRecaptcha();
         let appVerifier = window.recaptchaVerifier;
         const itemsCollection = collection(db, 'members');
@@ -52,12 +55,14 @@ const App = () => {
                             // user in with confirmationResult.confirm(code).
                             window.confirmationResult = confirmationResult;
                             setHasFilled(true);
+                            setLoading(false);
                         })
                         .catch((error) => {
                             // Error; SMS not sent
                             console.log(error);
                         });
                 } else {
+                    setLoading(false);
                     alert("We could not found your membership id. PLease use this link to register yourself as a member - https://docs.google.com/forms/d/e/1FAIpQLScklFF5f0GM_ADMC-49g5vaZS2Ikz8JUfVHZGEM7RG_0j-pew/viewform.")
                 }
             })
@@ -71,6 +76,7 @@ const App = () => {
         setOtp(otp);
 
         if (otp.length === 6) {
+            setLoading(true);
             // verifu otp
             let confirmationResult = window.confirmationResult;
             confirmationResult
@@ -81,6 +87,7 @@ const App = () => {
                     console.log(user);
                     alert("User signed in successfully");
                     setShowMain(true);
+                    setLoading(false);
                     // ...
                 })
                 .catch((error) => {
@@ -88,6 +95,7 @@ const App = () => {
                     // ...
                     alert("User couldn't sign in (bad verification code?)");
                     setHasFilled(false);
+                    setLoading(false);
                 });
         }
     };
@@ -95,10 +103,6 @@ const App = () => {
     if (!hasFilled) {
         return (
             <div className="app__container">
-                <header className="App-header">
-                    <h1>Hello, SIPA Member!</h1>
-                    <p>Welcome to Durga Puja 2023.</p>
-                </header>
                 <Card sx={{ width: "300px" }}>
                     <CardContent
                         sx={{
@@ -108,24 +112,28 @@ const App = () => {
                         }}
                     >
                         <Typography sx={{ padding: "20px" }} variant="h5" component="div">
-                            Enter your phone number
+                            Hello, SIPA Member! Welcome to Durga Puja 2023.
                         </Typography>
                         <form onSubmit={handleSend}>
                             <TextField
                                 sx={{ width: "240px" }}
                                 variant="outlined"
                                 autoComplete="off"
-                                label="Phone Number"
+                                label="Mobile Number"
                                 value={phone}
                                 onChange={(event) => setPhone(event.target.value)}
                             />
-                            <Button
-                                type="submit"
-                                variant="contained"
-                                sx={{ width: "240px", marginTop: "20px" }}
-                            >
-                                Send Code
-                            </Button>
+                            {loading ? (
+                                <CircularProgress sx={{ marginTop: "20px" }} />
+                            ) : (
+                                <Button
+                                    type="submit"
+                                    variant="contained"
+                                    sx={{ width: "240px", marginTop: "20px" }}
+                                >
+                                    Send Code
+                                </Button>
+                            )}
                         </form>
                     </CardContent>
                 </Card>
@@ -134,21 +142,27 @@ const App = () => {
         );
     } else if (showMain) {
         return (
-            <div className="App">
-                <header className="App-header">
-                    <h1>Hello, SIPA Member {memberName}!</h1>
-                    <p>Welcome to Durga Puja 2023.</p>
-                    <p>Your membership id is {memberId}</p>
-                </header>
+            <div className="app__container">
+                <Card sx={{ width: "300px" }}>
+                    <CardContent
+                        sx={{
+                            display: "flex",
+                            alignItems: "center",
+                            flexDirection: "column",
+                        }}
+                    >
+                        <Typography sx={{ padding: "20px" }} variant="h5" component="div">
+                            <h1>Hello, SIPA Member {memberName}!</h1>
+                            <p>Welcome to Durga Puja 2023.</p>
+                            <p>Your membership id is {memberId}</p>
+                        </Typography>
+                    </CardContent>
+                </Card>
             </div>
         );
     } else {
         return (
             <div className="app__container">
-                <header className="App-header">
-                    <h1>Hello, SIPA Member!</h1>
-                    <p>Welcome to Durga Puja 2023.</p>
-                </header>
                 <Card sx={{ width: "300px" }}>
                     <CardContent
                         sx={{
@@ -167,6 +181,9 @@ const App = () => {
                             value={otp}
                             onChange={verifyOtp}
                         />
+                        {loading ? (
+                            <CircularProgress sx={{ marginTop: "20px" }} />
+                        ) : (<div></div>)}
                     </CardContent>
                 </Card>
                 <div id="recaptcha"></div>

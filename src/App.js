@@ -13,6 +13,9 @@ import { collection, query, where, getDocs } from "firebase/firestore";
 const App = () => {
     const [phone, setPhone] = useState("+65");
     const [hasFilled, setHasFilled] = useState(false);
+    const [showMain, setShowMain] = useState(false);
+    const [memberName, setMemberName] = useState("");
+    const [memberId, setMemberId] = useState("");
     const [otp, setOtp] = useState("");
 
     const generateRecaptcha = () => {
@@ -39,6 +42,10 @@ const App = () => {
         getDocs(q)
             .then((querySnapshot) => {
                 if (!querySnapshot.empty) {
+                    querySnapshot.forEach((doc) => {
+                        setMemberId(doc.data().memberid);
+                        setMemberName(doc.data().name);
+                    });
                     signInWithPhoneNumber(auth, phone, appVerifier)
                         .then((confirmationResult) => {
                             // SMS sent. Prompt user to type the code from the message, then sign the
@@ -73,12 +80,14 @@ const App = () => {
                     let user = result.user;
                     console.log(user);
                     alert("User signed in successfully");
+                    setShowMain(true);
                     // ...
                 })
                 .catch((error) => {
                     // User couldn't sign in (bad verification code?)
                     // ...
                     alert("User couldn't sign in (bad verification code?)");
+                    setHasFilled(false);
                 });
         }
     };
@@ -123,9 +132,23 @@ const App = () => {
                 <div id="recaptcha"></div>
             </div>
         );
+    } else if (showMain) {
+        return (
+            <div className="App">
+                <header className="App-header">
+                    <h1>Hello, SIPA Member {memberName}!</h1>
+                    <p>Welcome to Durga Puja 2023.</p>
+                    <p>Your membership id is {memberId}</p>
+                </header>
+            </div>
+        );
     } else {
         return (
             <div className="app__container">
+                <header className="App-header">
+                    <h1>Hello, SIPA Member!</h1>
+                    <p>Welcome to Durga Puja 2023.</p>
+                </header>
                 <Card sx={{ width: "300px" }}>
                     <CardContent
                         sx={{
